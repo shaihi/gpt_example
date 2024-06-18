@@ -36,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
         apiClient = new OpenAIClient(getString(R.string.openai_api_key));
         conversationHistory = new ArrayList<>();
 
-        String setupRole = "You screen bad language. If inappropriate language is used, you respond with NAUGHTY!. Otherwise you are a helpful assistant.";
+        String setupRole = "You screen bad language. If inappropriate language is used, " +
+                "you respond with a single word: NAUGHTY!. " +
+                "Otherwise you respond as a helpful assistant.";
 
         try {
             // Initialize conversation history with setup prompt
