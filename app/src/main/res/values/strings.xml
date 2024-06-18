@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">gpt_example</string>
+    <string name="openai_api_key"></string>
+</resources>
