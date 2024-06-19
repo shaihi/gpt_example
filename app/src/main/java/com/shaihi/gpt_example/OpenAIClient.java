@@ -1,5 +1,6 @@
 package com.shaihi.gpt_example;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -20,19 +21,24 @@ public class OpenAIClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private final OkHttpClient client;
     private final String apiKey;
+    private Context context;
 
-    public OpenAIClient(String apiKey) {
+    public OpenAIClient(String apiKey, Context context) {
         this.client = new OkHttpClient();
         this.apiKey = apiKey;
+        this.context = context;
     }
 
     public String getCompletion(String prompt, List<JSONObject> conversationHistory) throws IOException {
         try {
-            JSONArray messages = new JSONArray(conversationHistory);
+            JSONArray messages = new JSONArray();
+            for (JSONObject message : conversationHistory) {
+                messages.put(message);
+            }
             messages.put(new JSONObject().put("role", "user").put("content", prompt));
 
             JSONObject requestBody = new JSONObject();
-            requestBody.put("model", "gpt-3.5-turbo");
+            requestBody.put("model", context.getString(R.string.gpt_model)); // Or your preferred model
             requestBody.put("messages", messages);
 
             RequestBody body = RequestBody.create(requestBody.toString(), JSON);
@@ -43,12 +49,13 @@ public class OpenAIClient {
                     .build();
 
             Log.d(TAG, "Request: " + request.toString());
-            Log.d(TAG, "Request Body: " + requestBody.toString());
+            Log.d(TAG,"Request Body: " + requestBody.toString());
 
             try (Response response = client.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "Unexpected code " + response);
-                    throw new IOException("Unexpected code " + response);
+                    String errorBody = response.body() != null ? response.body().string() : "No error body";
+                    Log.e(TAG, "Unexpected code " + response + ", Error Body: " + errorBody);
+                    throw new IOException("Unexpected code " + response + ", Error Body: " + errorBody);
                 }
                 String responseBody = response.body().string();
                 Log.d(TAG, "Response: " + responseBody);
